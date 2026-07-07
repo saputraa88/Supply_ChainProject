@@ -7,22 +7,35 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
-     * Jalankan migrasi untuk membuat tabel.
+     * Run the migrations.
      */
     public function up(): void
     {
         Schema::create('countries', function (Blueprint $table) {
-            $table->id(); // Membuat kolom 'id' sebagai Primary Key
-            $table->string('name'); // Kolom untuk nama negara [cite: 65]
-            $table->string('currency_code')->nullable(); // Kolom untuk kode mata uang [cite: 66]
-            $table->string('region')->nullable(); // Kolom untuk wilayah/region [cite: 67]
-            $table->string('language')->nullable(); // Kolom untuk bahasa [cite: 68]
-            $table->timestamps(); // Otomatis membuat kolom 'created_at' dan 'updated_at'
+            $table->id();
+
+            $table->string('name');
+            $table->string('code', 5)->unique();
+
+            $table->string('capital')->nullable();
+            $table->string('region')->nullable();
+
+            $table->string('currency')->nullable();
+            $table->string('currency_symbol')->nullable();
+
+            $table->decimal('latitude', 10, 7)->nullable();
+            $table->decimal('longitude', 10, 7)->nullable();
+
+            $table->string('flag')->nullable();
+
+            $table->bigInteger('population')->nullable();
+
+            $table->timestamps();
         });
     }
 
     /**
-     * Batalkan migrasi (menghapus tabel).
+     * Reverse the migrations.
      */
     public function down(): void
     {

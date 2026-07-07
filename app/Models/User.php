@@ -46,4 +46,20 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Relasi ke Watchlist
+     */
+    public function watchlists()
+    {
+        return $this->hasMany(Watchlist::class);
+    }
+
+    /**
+     * Relasi ke Article
+     */
+    public function articles()
+    {
+        return $this->hasMany(Article::class);
+    }
 }
