@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\Country;
+use Illuminate\Database\Seeder;
+use PragmaRX\Countries\Package\Countries;
 
 class CountrySeeder extends Seeder
 {
@@ -12,47 +13,38 @@ class CountrySeeder extends Seeder
      */
     public function run(): void
     {
-        $countries = [
-            [
-                'name' => 'Indonesia',
-                'code' => 'ID',
-                'capital' => 'Jakarta',
-                'region' => 'Asia',
-                'currency' => 'IDR',
-                'currency_symbol' => 'Rp',
-                'latitude' => -6.2000,
-                'longitude' => 106.8166,
-                'flag' => 'https://flagcdn.com/id.svg',
-                'population' => 281000000,
-            ],
-            [
-                'name' => 'Singapore',
-                'code' => 'SG',
-                'capital' => 'Singapore',
-                'region' => 'Asia',
-                'currency' => 'SGD',
-                'currency_symbol' => '$',
-                'latitude' => 1.3521,
-                'longitude' => 103.8198,
-                'flag' => 'https://flagcdn.com/sg.svg',
-                'population' => 6000000,
-            ],
-            [
-                'name' => 'Malaysia',
-                'code' => 'MY',
-                'capital' => 'Kuala Lumpur',
-                'region' => 'Asia',
-                'currency' => 'MYR',
-                'currency_symbol' => 'RM',
-                'latitude' => 3.1390,
-                'longitude' => 101.6869,
-                'flag' => 'https://flagcdn.com/my.svg',
-                'population' => 34000000,
-            ],
-        ];
+        $countries = new Countries();
 
-        foreach ($countries as $country) {
-            Country::create($country);
+        foreach ($countries->all() as $country) {
+
+            $currency = null;
+            $symbol = null;
+
+            if (isset($country->currencies) && count($country->currencies) > 0) {
+                $firstCurrency = collect($country->currencies)->first();
+
+                $currency = $firstCurrency->iso_4217 ?? null;
+                $symbol = $firstCurrency->units->major->symbol ?? null;
+            }
+
+            Country::updateOrCreate(
+                [
+                    'code' => $country->cca2,
+                ],
+                [
+                    'name' => $country->name->common ?? $country->name->official,
+                    'capital' => $country->capital[0] ?? null,
+                    'region' => $country->region ?? null,
+                    'currency' => $currency,
+                    'currency_symbol' => $symbol,
+                    'latitude' => $country->latlng[0] ?? null,
+                    'longitude' => $country->latlng[1] ?? null,
+                    'flag' => "https://flagcdn.com/w80/" . strtolower($country->cca2) . ".png",
+                    'population' => $country->population ?? 0,
+                ]
+            );
         }
+
+        $this->command->info('Semua negara berhasil diimport.');
     }
 }

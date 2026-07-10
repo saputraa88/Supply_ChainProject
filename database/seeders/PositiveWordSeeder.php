@@ -22,13 +22,20 @@ class PositiveWordSeeder extends Seeder
             'safe',
             'strong',
             'positive',
-            'recover'
+            'recover',
         ];
 
         foreach ($words as $word) {
-            PositiveWord::create([
-                'word' => $word
-            ]);
+
+            PositiveWord::updateOrCreate(
+                [
+                    'word' => $word,
+                ],
+                [
+                    'word' => $word,
+                ]
+            );
+
         }
     }
 }

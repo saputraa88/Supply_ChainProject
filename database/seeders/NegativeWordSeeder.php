@@ -22,13 +22,20 @@ class NegativeWordSeeder extends Seeder
             'decline',
             'loss',
             'risk',
-            'disaster'
+            'disaster',
         ];
 
         foreach ($words as $word) {
-            NegativeWord::create([
-                'word' => $word
-            ]);
+
+            NegativeWord::updateOrCreate(
+                [
+                    'word' => $word,
+                ],
+                [
+                    'word' => $word,
+                ]
+            );
+
         }
     }
 }
