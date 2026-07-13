@@ -23,8 +23,9 @@ return new class extends Migration
             $table->string('currency')->nullable();
             $table->string('currency_symbol')->nullable();
 
-            $table->decimal('latitude', 10, 7)->nullable();
-            $table->decimal('longitude', 10, 7)->nullable();
+            // BAGIAN YANG DIUBAH: Dari decimal menjadi string
+            $table->string('latitude')->nullable();
+            $table->string('longitude')->nullable();
 
             $table->string('flag')->nullable();
 

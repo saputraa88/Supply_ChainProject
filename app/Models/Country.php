@@ -56,4 +56,8 @@ class Country extends Model
     {
         return $this->hasMany(Watchlist::class);
     }
+    public function watchedByUsers()
+{
+    return $this->belongsToMany(\App\Models\User::class, 'watchlists')->withTimestamps();
+}
 }

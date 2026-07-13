@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Country;
 use Illuminate\Database\Seeder;
-use PragmaRX\Countries\Package\Countries;
+use App\Models\Country;
+use Illuminate\Support\Facades\Schema;
 
 class CountrySeeder extends Seeder
 {
@@ -13,38 +13,67 @@ class CountrySeeder extends Seeder
      */
     public function run(): void
     {
-        $countries = new Countries();
+        // 1. Matikan pengecekan foreign key sementara agar MySQL mengizinkan Truncate
+        Schema::disableForeignKeyConstraints();
+        Country::truncate();
+        Schema::enableForeignKeyConstraints();
 
-        foreach ($countries->all() as $country) {
+        // 2. Panggil instance dari package PragmaRX Countries
+        $countriesPackage = new \PragmaRX\Countries\Package\Countries();
+        
+        // Mengubah seluruh objek package menjadi Array Murni (Deep Array conversion)
+        $allCountries = json_decode(json_encode($countriesPackage->all()), true);
 
-            $currency = null;
-            $symbol = null;
+        // 3. Lakukan perulangan untuk menyimpan data ke database lokal
+        foreach ($allCountries as $item) {
+            
+            $code = $item['cca2'] ?? null;
+            if (!$code) continue;
 
-            if (isset($country->currencies) && count($country->currencies) > 0) {
-                $firstCurrency = collect($country->currencies)->first();
+            // --- PARSER NAMA NEGARA ---
+            $countryName = $item['name']['common'] ?? $item['name']['official'] ?? 'Unknown';
 
-                $currency = $firstCurrency->iso_4217 ?? null;
-                $symbol = $firstCurrency->units->major->symbol ?? null;
+            // --- PARSER IBU KOTA ---
+            $capitalName = null;
+            if (isset($item['capital'])) {
+                $capitalName = is_array($item['capital']) ? collect($item['capital'])->first() : $item['capital'];
             }
 
-            Country::updateOrCreate(
-                [
-                    'code' => $country->cca2,
-                ],
-                [
-                    'name' => $country->name->common ?? $country->name->official,
-                    'capital' => $country->capital[0] ?? null,
-                    'region' => $country->region ?? null,
-                    'currency' => $currency,
-                    'currency_symbol' => $symbol,
-                    'latitude' => $country->latlng[0] ?? null,
-                    'longitude' => $country->latlng[1] ?? null,
-                    'flag' => "https://flagcdn.com/w80/" . strtolower($country->cca2) . ".png",
-                    'population' => $country->population ?? 0,
-                ]
-            );
-        }
+            // --- PARSER REGION ---
+            $regionName = $item['region'] ?? $item['subregion'] ?? '-';
 
-        $this->command->info('Semua negara berhasil diimport.');
+            // --- PARSER MATA UANG & SIMBOL ---
+            $currencyName = null;
+            $currencySymbol = null;
+            if (isset($item['currencies']) && is_array($item['currencies']) && !empty($item['currencies'])) {
+                // Mengambil kode key pertama (misal: IDR, USD, AFN)
+                $firstKey = array_key_first($item['currencies']);
+                if ($firstKey && isset($item['currencies'][$firstKey])) {
+                    $currencyName = $item['currencies'][$firstKey]['name'] ?? null;
+                    $currencySymbol = $item['currencies'][$firstKey]['symbol'] ?? null;
+                }
+            }
+
+            // --- PARSER POPULASI ---
+            $population = $item['population'] ?? null;
+
+            // --- PARSER KOORDINAT ---
+            $latitude = $item['geo']['latitude'] ?? null;
+            $longitude = $item['geo']['longitude'] ?? null;
+
+            // 4. Simpan ke database
+            Country::create([
+                'name'            => $countryName,
+                'code'            => strtoupper($code),
+                'capital'         => $capitalName,
+                'region'          => $regionName,
+                'currency'        => $currencyName,
+                'currency_symbol' => $currencySymbol,
+                'latitude'        => $latitude ? (string)$latitude : null,
+                'longitude'       => $longitude ? (string)$longitude : null,
+                'flag'            => "https://flagcdn.com/w160/" . strtolower($code) . ".png",
+                'population'      => $population,
+            ]);
+        }
     }
 }

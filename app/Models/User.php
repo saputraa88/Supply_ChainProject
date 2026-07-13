@@ -54,6 +54,10 @@ class User extends Authenticatable
     {
         return $this->hasMany(Watchlist::class);
     }
+    public function watchedCountries()
+{
+    return $this->belongsToMany(\App\Models\Country::class, 'watchlists')->withTimestamps();
+}
 
     /**
      * Relasi ke Article

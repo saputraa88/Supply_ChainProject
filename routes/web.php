@@ -2,7 +2,9 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
-use App\Http\Controllers\CountryListController;
+use App\Http\Controllers\CountryController; // Kita pakai ini untuk Index & Show negara
+use App\Http\Controllers\WatchlistController;
+use App\Http\Controllers\PortController; 
 
 Route::get('/', function () {
     return view('welcome');
@@ -15,12 +17,27 @@ Route::middleware(['auth'])->group(function () {
         ->name('dashboard');
 
     // Daftar semua negara
-    Route::get('/countries', [CountryListController::class, 'index'])
+    Route::get('/countries', [CountryController::class, 'index'])
         ->name('countries.index');
 
-    // Detail negara
-    Route::get('/countries/{country}', [CountryListController::class, 'show'])
+    // Detail negara (SEKARANG SUDAH DIARAHKAN KE CountryController YANG ADA API NYA)
+    Route::get('/countries/{country}', [CountryController::class, 'show'])
         ->name('countries.show');
+
+    // Watchlist
+    Route::get('/watchlist', [WatchlistController::class, 'index'])
+        ->name('watchlist.index');
+    
+    Route::post('/countries/{country}/watchlist', [WatchlistController::class, 'toggle'])
+        ->name('watchlist.toggle');
+
+    // ==========================================
+    // BAGIAN BARU: CRUD PELABUHAN (PORTS)
+    // ==========================================
+    Route::get('/ports', [PortController::class, 'index'])->name('ports.index');
+    Route::get('/ports/create', [PortController::class, 'create'])->name('ports.create');
+    Route::post('/ports', [PortController::class, 'store'])->name('ports.store');
+    Route::delete('/ports/{port}', [PortController::class, 'destroy'])->name('ports.destroy');
 
 });
 

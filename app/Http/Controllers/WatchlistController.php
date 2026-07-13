@@ -2,63 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Country;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class WatchlistController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan daftar negara yang sedang dipantau oleh user log in.
      */
     public function index()
     {
-        //
+        $user = Auth::user();
+        
+        // Mengambil semua negara yang ditandai oleh user ini
+        $watchedCountries = $user->watchedCountries()->get();
+
+        return view('watchlist.index', compact('watchedCountries'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menambah atau Menghapus (Toggle) negara dari daftar pantau.
      */
-    public function create()
+    public function toggle(Country $country)
     {
-        //
-    }
+        $user = Auth::user();
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        // toggle() otomatis menambah jika belum ada, dan menghapus jika sudah ada di tabel watchlist
+        $user->watchedCountries()->toggle($country->id);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        // Bersihkan relasi di memori agar state langsung ter-update di view
+        $user->unsetRelation('watchedCountries');
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return redirect()->back()->with('success', 'Status daftar pantau negara berhasil diperbarui.');
     }
 }

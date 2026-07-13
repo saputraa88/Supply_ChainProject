@@ -1,39 +1,44 @@
 <nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
-    <!-- Primary Navigation -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
 
-            <!-- Logo + Menu -->
             <div class="flex">
 
-                <!-- Logo -->
                 <div class="shrink-0 flex items-center">
                     <a href="{{ route('dashboard') }}">
                         <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
                     </a>
                 </div>
 
-                <!-- Menu -->
                 <div class="hidden sm:flex sm:items-center sm:space-x-8 sm:ms-10">
 
-                    <!-- Dashboard -->
                     <x-nav-link
                         :href="route('dashboard')"
                         :active="request()->routeIs('dashboard')">
                         Dashboard
                     </x-nav-link>
 
-                    <!-- Negara -->
                     <x-nav-link
                         :href="route('countries.index')"
                         :active="request()->routeIs('countries.*')">
                         Negara
                     </x-nav-link>
 
+                    <x-nav-link
+                        :href="route('watchlist.index')"
+                        :active="request()->routeIs('watchlist.index')">
+                        Daftar Pantau
+                    </x-nav-link>
+
+                    <x-nav-link
+                        :href="route('ports.index')"
+                        :active="request()->routeIs('ports.*')">
+                        Pelabuhan
+                    </x-nav-link>
+
                 </div>
             </div>
 
-            <!-- User Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
 
@@ -80,7 +85,6 @@
                 </x-dropdown>
             </div>
 
-            <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
 
                 <button @click="open = !open"
@@ -116,7 +120,6 @@
         </div>
     </div>
 
-    <!-- Responsive Menu -->
     <div :class="{'block': open, 'hidden': !open}" class="hidden sm:hidden">
 
         <div class="pt-2 pb-3 space-y-1">
@@ -124,17 +127,25 @@
             <x-responsive-nav-link
                 :href="route('dashboard')"
                 :active="request()->routeIs('dashboard')">
-
                 Dashboard
-
             </x-responsive-nav-link>
 
             <x-responsive-nav-link
                 :href="route('countries.index')"
                 :active="request()->routeIs('countries.*')">
-
                 Negara
+            </x-responsive-nav-link>
 
+            <x-responsive-nav-link
+                :href="route('watchlist.index')"
+                :active="request()->routeIs('watchlist.index')">
+                Daftar Pantau
+            </x-responsive-nav-link>
+
+            <x-responsive-nav-link
+                :href="route('ports.index')"
+                :active="request()->routeIs('ports.*')">
+                Pelabuhan
             </x-responsive-nav-link>
 
         </div>
