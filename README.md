@@ -1,59 +1,63 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# 🌐 Global Supply Chain Risk Intelligence Platform
+> **Platform Monitoring Risiko Rantai Pasok Global Berbasis Multi-API dan Analitik Data**
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Proyek ini merupakan sistem pendukung keputusan (*Decision Support System*) dan dashboard analitik yang dirancang untuk memantau, menganalisis, serta memprediksi berbagai risiko logistik dan perdagangan internasional secara *real-time*. Platform ini membantu perusahaan mengantisipasi gangguan pengiriman barang dari berbagai negara akibat cuaca ekstrem, volatilitas mata uang, geopolitik, hingga kemacetan pelabuhan.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Fitur Utama
+Sistem ini mengintegrasikan data dari 6-7 API eksternal gratis untuk menyajikan metrik analitik berikut:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+1. **Global Country Dashboard:** Memantau indikator makro ekonomi seperti GDP, Inflasi, Populasi, Mata Uang, dan Cuaca terkini dari negara yang dipilih.
+2. **Risk Scoring Engine:** Algoritma kustom (*Simple Scoring/Weighted Risk Model*) untuk menghitung total skor risiko suatu negara berdasarkan variabel Cuaca (30%), Inflasi (20%), Berita Geopolitik (40%), dan Kurs (10%).
+3. **Geospatial Port & Weather Map:** Visualisasi peta interaktif menggunakan **Leaflet.js** dan **OpenStreetMap** untuk memetakan lokasi pelabuhan dunia (*World Port Index*) serta kondisi cuaca ekstrem secara langsung.
+4. **Lexicon Based Sentiment Analysis:** Analisis sentimen berita ekonomi dan logistik menggunakan algoritma berbasis kamus (*kata positif & negatif*) yang dibangun secara mandiri menggunakan PHP (Tanpa AI Berbayar).
+5. **Currency Impact & Data Visualization Dashboard:** Grafik tren historis untuk pergerakan kurs, inflasi, GDP, dan risiko menggunakan **Chart.js**.
+6. **Country Comparison Engine:** Fitur membandingkan metrik risiko dan ekonomi antar dua negara secara *side-by-side*.
+7. **Favorite Monitoring List & Admin Panel:** Fitur bagi pengguna untuk menyimpan negara pantauan khusus serta panel admin untuk mengelola user, artikel, dan dataset pelabuhan.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🛠️ Tech Stack & Arsitektur
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+### Backend
+* **Framework:** Laravel (PHP)
+* **Database:** MySQL (15-20 Tabel Relasional)
+* **API Architecture:** REST API buatan sendiri (30+ Endpoints) & Multi-API Integration.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Frontend & Visualisasi
+* **UI Style:** Bootstrap 5 (Clean & Modern Layout)
+* **Interaktivitas:** AJAX (JavaScript ES6) untuk pembaruan data asinkron tanpa reload.
+* **Grafik:** Chart.js
+* **Peta Spasial:** Leaflet.js
 
-## Laravel Sponsors
+### Integrasi API Eksternal
+* **Open-Meteo API:** Data temperatur, curah hujan, kecepatan angin, dan risiko badai.
+* **World Bank API:** Data tren GDP, Inflasi, Populasi, dan Ekspor-Impor negara.
+* **REST Countries API:** Informasi detail negara, wilayah, bahasa, dan mata uang resmi.
+* **ExchangeRate API:** Kurs mata uang global secara *real-time*.
+* **World Port Index Dataset:** Data publik koordinat lokasi pelabuhan dunia.
+* **GNews API:** Sumber berita logistik, perdagangan, dan geopolitik global.
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 🗄️ Endpoint API Internal yang Dibangun
+Sistem ini menyediakan layanan REST API mandiri yang dapat diakses melalui:
+* `GET /api/countries` - Mengambil daftar negara dan metrik dasarnya.
+* `GET /api/risk` - Mengambil hasil kalkulasi skor risiko negara.
+* `GET /api/ports` - Menyediakan data lokasi dan koordinat pelabuhan.
+* `GET /api/news` - Mengambil cache berita beserta hasil analisis sentimennya.
+* `GET /api/currency` - Menyediakan fluktuasi kurs mata uang terbaru.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+## 💻 Cara Menjalankan Proyek secara Lokal
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Prerequisites
+Pastikan Anda sudah menginstal **PHP (>= 8.x)**, **Composer**, dan **MySQL/XAMPP**.
 
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Langkah Instalasi
+1. Clone repositori ini ke komputer lokal Anda:
+   ```bash
+   git clone [https://github.com/saputraa88/Supply_ChainProject.git](https://github.com/saputraa88/Supply_ChainProject.git)
+   cd Supply_ChainProject<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9d5c4600-b847-4251-b37d-082ab38bae24" />
