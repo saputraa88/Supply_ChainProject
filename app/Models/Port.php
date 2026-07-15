@@ -9,6 +9,7 @@ class Port extends Model
 {
     use HasFactory;
 
+    // Keyword wajib menggunakan 'protected' dan kolom menggunakan bahasa Inggris sesuai database
     protected $fillable = [
         'country_id',
         'name',

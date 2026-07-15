@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Country;
+use App\Models\Port; // 1. Pastikan mengimpor Model Port di bagian atas! ⚓
 use Illuminate\Http\Request;
 
 class ApiController extends Controller
@@ -47,30 +48,31 @@ class ApiController extends Controller
     }
 
     /**
-     * Endpoint: GET /api/ports (BARU 🔥)
-     * Menyajikan data titik simpul pelabuhan cargo utama rantai pasok
+     * Endpoint: GET /api/ports
+     * Menyajikan data koordinat pelabuhan riil berdasarkan input pencarian & filter negara
      */
-    public function getPorts()
+    public function getPorts(Request $request) // 2. Tambahkan Request untuk membaca filter pencarian
     {
-        $ports = [
-            ['name' => 'Tanjung Priok', 'country_code' => 'ID', 'status' => 'Normal Operation', 'congestion_level' => 'Low'],
-            ['name' => 'Port of Shanghai', 'country_code' => 'CN', 'status' => 'Heavy Congestion', 'congestion_level' => 'High'],
-            ['name' => 'Port of Los Angeles', 'country_code' => 'US', 'status' => 'Delayed Clearance', 'congestion_level' => 'Medium'],
-            ['name' => 'Port of Hamburg', 'country_code' => 'DE', 'status' => 'Normal Operation', 'congestion_level' => 'Low'],
-        ];
+        $search = $request->query('search');
+        $countryId = $request->query('country_id');
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Data pelabuhan cargo logistik berhasil dimuat',
-            'total_data' => count($ports),
-            'data' => $ports
-        ], 200);
+        // 3. Query data dari database dengan eager loading relasi 'country'
+        $ports = Port::with('country')
+            ->when($search, function ($query, $search) {
+                return $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('code', 'like', "%{$search}%");
+                });
+            })
+            ->when($countryId, function ($query, $countryId) {
+                return $query->where('country_id', $countryId);
+            })
+            ->get();
+
+        // 4. Kembalikan langsung array koleksi pelabuhan agar kompatibel dengan JS: ports.forEach()
+        return response()->json($ports);
     }
 
-    /**
-     * Endpoint: GET /api/news (BARU 🔥)
-     * Menyajikan feed berita terkini untuk analisis sentimen kecerdasan bisnis
-     */
     public function getNews()
     {
         $news = [

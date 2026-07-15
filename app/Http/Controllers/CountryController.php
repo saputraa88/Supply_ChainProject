@@ -176,23 +176,25 @@ class CountryController extends Controller
     {
         set_time_limit(120);
 
-        // Kamus cadangan offline
+        // Kamus cadangan offline (Sudah ditambahkan parameter populasi dan negara DE/Jerman)
         $fallbackData = [
-            'AF' => ['region' => 'Asia', 'currency' => 'Afghan afghani'],
-            'ID' => ['region' => 'Asia', 'currency' => 'Indonesian rupiah'],
-            'US' => ['region' => 'Americas', 'currency' => 'United States dollar'],
-            'GB' => ['region' => 'Europe', 'currency' => 'British pound'],
-            'UA' => ['region' => 'Europe', 'currency' => 'Ukrainian hryvnia'],
-            'YE' => ['region' => 'Asia', 'currency' => 'Yemeni rial'],
-            'SY' => ['region' => 'Asia', 'currency' => 'Syrian pound'],
-            'SD' => ['region' => 'Africa', 'currency' => 'Sudanese pound']
+            'AF' => ['region' => 'Asia', 'currency' => 'Afghan afghani', 'population' => 40218234],
+            'ID' => ['region' => 'Asia', 'currency' => 'Indonesian rupiah', 'population' => 275500000],
+            'US' => ['region' => 'Americas', 'currency' => 'United States dollar', 'population' => 333200000],
+            'GB' => ['region' => 'Europe', 'currency' => 'British pound', 'population' => 67330000],
+            'UA' => ['region' => 'Europe', 'currency' => 'Ukrainian hryvnia', 'population' => 43810000],
+            'YE' => ['region' => 'Asia', 'currency' => 'Yemeni rial', 'population' => 33690000],
+            'SY' => ['region' => 'Asia', 'currency' => 'Syrian pound', 'population' => 22125000],
+            'SD' => ['region' => 'Africa', 'currency' => 'Sudanese pound', 'population' => 46870000],
+            'DE' => ['region' => 'Europe', 'currency' => 'Euro', 'population' => 83240000] 
             // ... (simpan kamus fallback Anda sebelumnya di sini untuk kelengkapan)
         ];
 
         try {
+            // PERBAIKAN: Menambahkan 'population' pada request fields
             $response = Http::withoutVerifying()
                 ->timeout(15)
-                ->get('https://restcountries.com/v3.1/all?fields=cca2,region,currencies');
+                ->get('https://restcountries.com/v3.1/all?fields=cca2,region,currencies,population');
 
             $apiMap = [];
             $isApiSuccess = false;
@@ -219,10 +221,12 @@ class CountryController extends Controller
             $codeClean = strtoupper(trim($country->code));
             $region = 'Global Area';
             $currencyName = 'Local Currency';
+            $population = null; // PERBAIKAN: Variabel penampung populasi
 
             if ($isApiSuccess && isset($apiMap[$codeClean])) {
                 $apiData = $apiMap[$codeClean];
                 $region = $apiData['region'] ?? 'Global Area';
+                $population = $apiData['population'] ?? null; // Menangkap populasi dari API
                 
                 if (!empty($apiData['currencies'])) {
                     $currencyKey = array_key_first($apiData['currencies']);
@@ -230,15 +234,20 @@ class CountryController extends Controller
                 }
             } 
             elseif (isset($fallbackData[$codeClean])) {
-                $region = $fallbackData[$codeClean]['region'];
-                $currencyName = $fallbackData[$codeClean]['currency'];
+                $region = $fallbackData[$codeClean]['region'] ?? 'Global Area';
+                $currencyName = $fallbackData[$codeClean]['currency'] ?? 'Local Currency';
+                $population = $fallbackData[$codeClean]['population'] ?? null;
             }
 
-            if ($region !== 'Global Area' || $currencyName !== 'Local Currency') {
-                $country->update([
-                    'region'   => $region,
-                    'currency' => $currencyName,
-                ]);
+            // PERBAIKAN: Memasukkan populasi ke dalam pengecekan update
+            if ($region !== 'Global Area' || $currencyName !== 'Local Currency' || $population !== null) {
+                
+                $updateData = [];
+                if ($region !== 'Global Area') $updateData['region'] = $region;
+                if ($currencyName !== 'Local Currency') $updateData['currency'] = $currencyName;
+                if ($population !== null) $updateData['population'] = $population;
+                
+                $country->update($updateData);
                 $updatedCount++;
             }
         }

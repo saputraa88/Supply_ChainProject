@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ApiController; // Import ApiController kita 🔥
+use App\Http\Controllers\ApiController; // Mengimpor ApiController 🔥
 
 /*
 |--------------------------------------------------------------------------
@@ -16,10 +16,9 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 
-// RUTE REST API GLOBAL SUPPLY CHAIN (Sesuai Halaman 9 Dokumen PDF Dosen) 🚀
+// RUTE REST API GLOBAL SUPPLY CHAIN (Wajib Sesuai Dokumen PDF Halaman 9) 🚀
 Route::get('/countries', [ApiController::class, 'getCountries']);
 Route::get('/risk', [ApiController::class, 'getRisk']);
-
-// Tambahkan ini di bawah rute countries dan risk kamu yang sudah ada:
 Route::get('/ports', [ApiController::class, 'getPorts']);
 Route::get('/news', [ApiController::class, 'getNews']);
+Route::get('/currency', [ApiController::class, 'getCurrency']); // Ditambahkan agar lulus spesifikasi tugas!

@@ -11,6 +11,8 @@
         </div>
     </x-slot>
 
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+
     <div style="padding: 40px 0; background-color: #f3f4f6; min-height: 85vh;">
         <div style="max-width: 1024px; margin: 0 auto; padding: 0 20px;">
 
@@ -19,6 +21,33 @@
                     🎉 {{ session('success') }}
                 </div>
             @endif
+
+            <div style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); padding: 24px; margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #111827; margin: 0;">🗺️ Peta Lokasi Pelabuhan Dunia</h3>
+                    
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <input type="text" id="mapSearch" placeholder="Cari pelabuhan / kode..." 
+                               style="border: 1px solid #d1d5db; border-radius: 8px; padding: 6px 12px; font-size: 14px; outline: none; width: 200px;">
+                        
+                        <select id="mapCountryFilter" style="border: 1px solid #d1d5db; border-radius: 8px; padding: 6px 12px; font-size: 14px; outline: none; background-color: #ffffff; width: 180px;">
+                            <option value="">Semua Negara</option>
+                            @isset($countries)
+                                @foreach($countries as $country)
+                                    <option value="{{ $country->id }}">{{ $country->name }}</option>
+                                @endforeach
+                            @endisset
+                        </select>
+                        
+                        <button onclick="loadMapMarkers()" style="background-color: #2563eb; color: #ffffff; border: none; padding: 6px 16px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.2s;"
+                                onmouseover="this.style.backgroundColor='#1d4ed8'" onmouseout="this.style.backgroundColor='#2563eb'">
+                            Cari
+                        </button>
+                    </div>
+                </div>
+
+                <div id="portMap" style="height: 380px; border-radius: 12px; border: 1px solid #e5e7eb; z-index: 1;"></div>
+            </div>
 
             <div style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); padding: 24px;">
                 
@@ -67,4 +96,134 @@
             </div>
         </div>
     </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <script>
+        // 1. Inisialisasi Peta Dunia (Fokus default tengah-tengah ekuator / wilayah Indonesia)
+        var map = L.map('portMap').setView([5.0, 115.0], 3);
+
+        // Menggunakan OpenStreetMap gratis
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 18,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+
+        // Group Layer untuk menampung marker agar bisa dihapus-tulis ulang saat pencarian dilakukan
+        var markersLayer = L.layerGroup().addTo(map);
+
+        /**
+         * FUNGSI DECODER DMS KE DESIMAL:
+         * Mengubah teks koordinat derajat di database (misal: "6 05 S" atau "106 53 E")
+         * menjadi format angka desimal murni (float) agar dikenali oleh Leaflet.js.
+         */
+        function parseDMSToDecimal(dmsStr) {
+            if (!dmsStr) return null;
+            
+            // Hapus spasi berlebih di awal/akhir dan ubah spasi ganda menjadi tunggal
+            var str = dmsStr.trim().replace(/\s+/g, ' ');
+            
+            // Jika data di DB sudah berupa angka desimal murni, langsung kembalikan float
+            if (!isNaN(str)) return parseFloat(str);
+            
+            var parts = str.split(' ');
+            
+            if (parts.length >= 2) {
+                var degrees = parseFloat(parts[0]) || 0;
+                var minutes = parseFloat(parts[1]) || 0;
+                var seconds = 0;
+                
+                // Ambil karakter terakhir untuk menentukan arah mata angin (N, S, E, W)
+                var lastPart = parts[parts.length - 1].toUpperCase();
+                var hasDirection = ['N', 'S', 'E', 'W'].includes(lastPart);
+                var direction = hasDirection ? lastPart : null;
+
+                // Hitung detik jika formatnya lengkap (cth: "51 45 30 S")
+                if (hasDirection && parts.length === 4) {
+                    seconds = parseFloat(parts[2]) || 0;
+                } else if (!hasDirection && parts.length === 3) {
+                    seconds = parseFloat(parts[2]) || 0;
+                }
+
+                // Kalkulasi ke desimal murni
+                var decimal = degrees + (minutes / 60) + (seconds / 3600);
+                
+                // Jika arahnya Selatan (S) atau Barat (W), nilainya wajib negatif (-)
+                if (direction === 'S' || direction === 'W') {
+                    decimal = -decimal;
+                }
+                return decimal;
+            }
+            
+            return parseFloat(str);
+        }
+
+        /**
+         * Mengambil data koordinat pelabuhan dari API dan me-render marker interaktif ke peta
+         */
+        function loadMapMarkers() {
+            var search = document.getElementById('mapSearch').value;
+            var countryId = document.getElementById('mapCountryFilter').value;
+
+            // Hapus semua marker lama sebelum memuat yang baru
+            markersLayer.clearLayers();
+
+            // Panggil REST API internal yang mengarah ke controller Anda
+            var url = `/api/ports?search=${encodeURIComponent(search)}&country_id=${encodeURIComponent(countryId)}`;
+
+            fetch(url)
+                .then(response => response.json())
+                .then(ports => {
+                    var bounds = [];
+
+                    ports.forEach(port => {
+                        // Terjemahkan koordinat teks dari DB ke koordinat desimal Leaflet
+                        var lat = parseDMSToDecimal(port.latitude);
+                        var lng = parseDMSToDecimal(port.longitude);
+
+                        // Pastikan koordinat hasil terjemahan valid sebelum di-render
+                        if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
+                            
+                            // Konten Popup info pelabuhan saat marker di-klik
+                            var popupContent = `
+                                <div style="font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; min-width: 160px;">
+                                    <h4 style="margin: 0 0 6px; color: #111827; font-weight: 700; font-size: 13px;">⚓ ${port.name}</h4>
+                                    <div style="border-top: 1px solid #e5e7eb; padding-top: 6px;">
+                                        <p style="margin: 0 0 4px; color: #4b5563;"><b>Kode:</b> <code style="background-color: #f3f4f6; padding: 2px 4px; border-radius: 4px;">${port.code || '-'}</code></p>
+                                        <p style="margin: 0 0 4px; color: #4b5563;"><b>Negara:</b> ${port.country ? port.country.name : 'Tidak Diketahui'}</p>
+                                        <p style="margin: 0; color: #2563eb; font-size: 11px;">📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}</p>
+                                    </div>
+                                </div>
+                            `;
+
+                            var marker = L.marker([lat, lng]).bindPopup(popupContent);
+                            
+                            markersLayer.addLayer(marker);
+                            bounds.push([lat, lng]);
+                        }
+                    });
+
+                    // LOGIKA SMART ZOOM & TRANSISI MAP:
+                    if (bounds.length === 1) {
+                        // JIKA HANYA ADA 1 HASIL: Gunakan .flyTo agar peta bergeser dengan animasi mulus dan zoom level dekat (12)
+                        map.flyTo(bounds[0], 12, {
+                            animate: true,
+                            duration: 1.5 // Durasi animasi pergeseran dalam detik
+                        });
+                    } else if (bounds.length > 1) {
+                        // JIKA ADA BANYAK HASIL: Sesuaikan area layar (fitBounds) agar semua marker terlihat bersamaan
+                        map.fitBounds(bounds, { padding: [50, 50] });
+                    } else {
+                        // RESET PETA: Jika hasil pencarian kosong, kembalikan posisi peta ke default dunia
+                        map.setView([5.0, 115.0], 3); 
+                    }
+                })
+                .catch(err => console.error('Gagal memuat data API Pelabuhan:', err));
+        }
+
+        // Peta langsung memuat semua marker pelabuhan saat halaman pertama kali dibuka
+        document.addEventListener('DOMContentLoaded', function() {
+            loadMapMarkers();
+        });
+    </script>
 </x-app-layout>
