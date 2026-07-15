@@ -20,7 +20,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/countries', [CountryController::class, 'index'])
         ->name('countries.index');
 
-    // Detail negara (SEKARANG SUDAH DIARAHKAN KE CountryController YANG ADA API NYA)
+    // ==========================================
+    // SINKRONISASI MASSAL (Taruh Di Atas Detail `{country}`)
+    // ==========================================
+    Route::get('/countries/sync-all', [CountryController::class, 'syncAll'])
+        ->name('countries.syncAll');
+
+    // Detail negara
     Route::get('/countries/{country}', [CountryController::class, 'show'])
         ->name('countries.show');
 

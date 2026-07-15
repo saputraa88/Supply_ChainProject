@@ -8,24 +8,41 @@
     <div style="padding: 32px 0; background-color: #f3f4f6; min-height: 85vh; font-family: 'Inter', system-ui, -apple-system, sans-serif;">
         <div style="max-width: 1200px; margin: 0 auto; padding: 0 24px;">
             
+            @if(session('success'))
+                <div style="background-color: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; padding: 14px 20px; border-radius: 8px; margin-bottom: 24px; font-weight: 600; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                    ✅ {{ session('success') }}
+                </div>
+            @endif
+
             <div style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05); padding: 28px;">
 
-                <form method="GET" action="{{ route('countries.index') }}" style="margin-bottom: 28px;">
-                    <div style="display: flex; gap: 12px;">
-                        <input
-                            type="text"
-                            name="search"
-                            value="{{ $search }}"
-                            placeholder="🔍 Cari berdasarkan nama negara atau kode (Contoh: Afghanistan, AF)..."
-                            style="flex: 1; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 18px; font-size: 15px; outline: none; transition: border-color 0.2s; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
-                            onfocus="this.style.borderColor='#2563eb';"
-                            onblur="this.style.borderColor='#d1d5db';"
-                        >
-                        <button type="submit" style="background-color: #2563eb; color: white; border: none; border-radius: 8px; padding: 0 24px; font-weight: 600; cursor: pointer; font-size: 15px; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#1d4ed8'" onmouseout="this.style.backgroundColor='#2563eb'">
-                            Cari
-                        </button>
-                    </div>
-                </form>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+                    
+                    <form method="GET" action="{{ route('countries.index') }}" style="flex: 1; min-width: 300px; margin: 0;">
+                        <div style="display: flex; gap: 12px;">
+                            <input
+                                type="text"
+                                name="search"
+                                value="{{ $search }}"
+                                placeholder="🔍 Cari berdasarkan nama negara atau kode (Contoh: Afghanistan, AF)..."
+                                style="flex: 1; border: 1px solid #d1d5db; border-radius: 8px; padding: 12px 18px; font-size: 15px; outline: none; transition: border-color 0.2s; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);"
+                                onfocus="this.style.borderColor='#2563eb';"
+                                onblur="this.style.borderColor='#d1d5db';"
+                            >
+                            <button type="submit" style="background-color: #2563eb; color: white; border: none; border-radius: 8px; padding: 0 24px; font-weight: 600; cursor: pointer; font-size: 15px; transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#1d4ed8'" onmouseout="this.style.backgroundColor='#2563eb'">
+                                Cari
+                            </button>
+                        </div>
+                    </form>
+
+                    <a href="{{ route('countries.syncAll') }}" 
+                       style="background-color: #10b981; color: white; border: none; border-radius: 8px; padding: 13px 22px; font-weight: bold; cursor: pointer; font-size: 14px; text-decoration: none; transition: background-color 0.2s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 6px rgba(16, 185, 129, 0.2);" 
+                       onmouseover="this.style.backgroundColor='#059669'" 
+                       onmouseout="this.style.backgroundColor='#10b981'">
+                        🔄 Sinkronisasi Massal (API)
+                    </a>
+
+                </div>
 
                 <div style="overflow-x: auto; border: 1px solid #e5e7eb; border-radius: 8px;">
                     <table style="width: 100%; border-collapse: collapse; background-color: white;">
@@ -41,7 +58,7 @@
                         </thead>
                         <tbody style="font-size: 15px; color: #374151;">
                             @php
-                                // Kamus data lokal cadangan agar halaman index tidak kosong/strip
+                                // Kamus data lokal cadangan agar halaman index tidak kosong saat offline
                                 $localIndexData = [
                                     'af' => ['region' => 'Asia', 'curr' => 'Afghan afghani', 'sym' => '؋'],
                                     'id' => ['region' => 'Asia', 'curr' => 'Indonesian rupiah', 'sym' => 'Rp'],
@@ -52,17 +69,36 @@
                                     'sg' => ['region' => 'Asia', 'curr' => 'Singapore dollar', 'sym' => '$'],
                                     'my' => ['region' => 'Asia', 'curr' => 'Malaysian ringgit', 'sym' => 'RM'],
                                     'jp' => ['region' => 'Asia', 'curr' => 'Japanese yen', 'sym' => '¥'],
+                                    
+                                    // Backup tambahan wilayah halaman pertama Anda
+                                    'al' => ['region' => 'Europe', 'curr' => 'Albanian lek', 'sym' => 'Lek'],
+                                    'dz' => ['region' => 'Africa', 'curr' => 'Algerian dinar', 'sym' => 'DA'],
+                                    'ax' => ['region' => 'Europe', 'curr' => 'Euro', 'sym' => '€'],
+                                    'ad' => ['region' => 'Europe', 'curr' => 'Euro', 'sym' => '€'],
+                                    'ao' => ['region' => 'Africa', 'curr' => 'Angolan kwanza', 'sym' => 'Kz'],
+                                    'ai' => ['region' => 'Americas', 'curr' => 'East Caribbean dollar', 'sym' => '$'],
+                                    'aq' => ['region' => 'Antarctic', 'curr' => 'Antarctic Currency', 'sym' => '¤'],
+                                    'as' => ['region' => 'Oceania', 'curr' => 'US Dollar', 'sym' => '$'],
+                                    'wsb' => ['region' => 'Europe', 'curr' => 'Euro', 'sym' => '€'],
                                 ];
                             @endphp
 
                             @forelse($countries as $index => $country)
                                 @php
                                     $codeClean = trim(strtolower($country->code));
-                                    $displayRegion = $localIndexData[$codeClean]['region'] ?? 'Global Area';
-                                    $displayCurrency = $localIndexData[$codeClean]['curr'] ?? 'Local Currency';
+                                    
+                                    // PRIORITAS UTAMA: Gunakan database. JIKA data di database kosong / default, pakai Kamus Cadangan
+                                    $displayRegion = (!empty($country->region) && $country->region !== '-' && $country->region !== 'Global Area') 
+                                        ? $country->region 
+                                        : ($localIndexData[$codeClean]['region'] ?? 'Global Area');
+
+                                    $displayCurrency = (!empty($country->currency) && $country->currency !== 'Local Currency') 
+                                        ? $country->currency 
+                                        : ($localIndexData[$codeClean]['curr'] ?? 'Local Currency');
+
                                     $displaySymbol = $localIndexData[$codeClean]['sym'] ?? '';
                                     
-                                    // Membuat efek warna selang-seling (zebra striping) pada baris tabel
+                                    // Efek warna selang-seling (zebra striping) pada baris tabel
                                     $rowBg = ($index % 2 == 0) ? '#ffffff' : '#f8fafc';
                                 @endphp
                                 <tr style="background-color: {{ $rowBg }}; border-bottom: 1px solid #e5e7eb; transition: background-color 0.15s;" onmouseover="this.style.backgroundColor='#f1f5f9'" onmouseout="this.style.backgroundColor='{{ $rowBg }}'">
