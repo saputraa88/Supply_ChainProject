@@ -28,6 +28,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        // 🔀 PERUBAHAN DI SINI: Deteksi Role Setelah Sukses Login
+        // Jika yang login adalah admin, langsung arahkan ke halaman panel admin
+        if ($request->user()->role === 'admin') {
+            return redirect('/admin/dashboard');
+        }
+
+        // Jika user biasa, arahkan ke dashboard logistik utama
         return redirect()->intended(route('dashboard', absolute: false));
     }
 

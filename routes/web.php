@@ -5,6 +5,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\CountryController; // Kita pakai ini untuk Index & Show negara
 use App\Http\Controllers\WatchlistController;
 use App\Http\Controllers\PortController; 
+use App\Http\Controllers\AdminController; // Tambahan Baru untuk Fitur Ke-10
 
 Route::get('/', function () {
     return view('welcome');
@@ -16,21 +17,47 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])
         ->name('dashboard');
 
-    // Daftar semua negara
+    // ==========================================
+    // FITUR KE-4: CURRENCY IMPACT DASHBOARD
+    // ==========================================
+    Route::get('/currency-impact', [CountryController::class, 'currencyDashboard'])
+        ->name('currency.index');
+
+    // ==========================================
+    // FITUR KE-7: DATA VISUALIZATION DASHBOARD
+    // ==========================================
+    Route::get('/historical-dashboard', [CountryController::class, 'historicalDashboard'])
+        ->name('historical.index');
+
+    // ==========================================
+    // FITUR KE-10: ADMIN CONTROL DASHBOARD
+    // ==========================================
+    Route::get('/admin/dashboard', [AdminController::class, 'index'])
+        ->name('admin.dashboard');
+
+    // ==========================================
+    // SEGMEN INTELIJEN NEGARA & RISK SCORING
+    // ==========================================
+    
+    // 1. Daftar semua negara
     Route::get('/countries', [CountryController::class, 'index'])
         ->name('countries.index');
 
-    // ==========================================
-    // SINKRONISASI MASSAL (Taruh Di Atas Detail `{country}`)
-    // ==========================================
+    // 2. SINKRONISASI MASSAL (Harus di atas {country})
     Route::get('/countries/sync-all', [CountryController::class, 'syncAll'])
         ->name('countries.syncAll');
 
-    // Detail negara
+    // 3. FITUR KE-8: PERBANDINGAN NEGARA (Harus di atas {country})
+    Route::get('/countries/comparison', [CountryController::class, 'comparison'])
+        ->name('countries.comparison');
+
+    // 4. Detail negara (Wildcard ditaruh paling bawah)
     Route::get('/countries/{country}', [CountryController::class, 'show'])
         ->name('countries.show');
 
-    // Watchlist
+    // ==========================================
+    // DAFTAR PANTAU (WATCHLIST)
+    // ==========================================
     Route::get('/watchlist', [WatchlistController::class, 'index'])
         ->name('watchlist.index');
     
@@ -38,7 +65,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('watchlist.toggle');
 
     // ==========================================
-    // BAGIAN BARU: CRUD PELABUHAN (PORTS)
+    // CRUD PELABUHAN (PORTS)
     // ==========================================
     Route::get('/ports', [PortController::class, 'index'])->name('ports.index');
     Route::get('/ports/create', [PortController::class, 'create'])->name('ports.create');
