@@ -4,6 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight" style="font-family: system-ui, sans-serif; display: flex; align-items: center; gap: 8px; margin: 0;">
                 <span style="font-size: 1.35rem;">⚓</span> {{ __('Manajemen Infrastruktur Pelabuhan') }}
             </h2>
+            {{-- TOMBOL REGISTRASI PELABUHAN DISEMBUNYIKAN DI SINI
             <a href="{{ route('ports.create') }}" 
                style="background-color: #2563eb; color: #ffffff; padding: 10px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2); transition: all 0.2s ease;"
                onmouseover="this.style.backgroundColor='#1d4ed8'; this.style.transform='translateY(-1px)';" 
@@ -13,6 +14,7 @@
                 </svg>
                 Registrasi Pelabuhan
             </a>
+            --}}
         </div>
     </x-slot>
 
@@ -122,7 +124,6 @@
             border-color: #ef4444;
             box-shadow: 0 4px 8px rgba(239, 68, 68, 0.2);
         }
-        /* Styling Scrollbar Tabel agar halus */
         .table-scroll::-webkit-scrollbar {
             height: 6px;
         }
@@ -133,7 +134,6 @@
             background: #cbd5e1;
             border-radius: 3px;
         }
-        /* Animasi khusus popup peta */
         .leaflet-popup-content-wrapper {
             border-radius: 12px;
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -195,9 +195,11 @@
                         <span style="font-size: 54px; display: block; margin-bottom: 16px;">⚓</span>
                         <h3 style="font-size: 16px; font-weight: 700; color: #1e293b; margin-bottom: 6px;">Basis Data Masih Kosong</h3>
                         <p style="font-size: 14px; margin-bottom: 20px; color: #64748b;">Belum ada infrastruktur maritim yang terdaftar saat ini.</p>
+                        {{-- LINK REDIREKSI KONDISI KOSONG JUGA DISEMBUNYIKAN DI SINI
                         <a href="{{ route('ports.create') }}" style="color: #2563eb; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
                             Registrasi Pelabuhan Pertama Anda <i class="bi bi-arrow-right"></i>
                         </a>
+                        --}}
                     </div>
                 @else
                     <div class="table-scroll" style="overflow-x: auto;">
@@ -209,7 +211,7 @@
                                     <th>Negara Kedaulatan</th>
                                     <th style="text-align: center; padding-right: 24px;">Aksi</th>
                                 </tr>
-                            </thead>
+                             Clyde </thead>
                             <tbody>
                                 @foreach($ports as $port)
                                     <tr>
@@ -261,26 +263,16 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     
     <script>
-        // 1. Inisialisasi Peta Dunia (Fokus wilayah Indonesia secara default)
         var map = L.map('portMap').setView([5.0, 115.0], 3);
 
-        // Menggunakan OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 18,
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         }).addTo(map);
 
-        // Group Layer untuk menampung marker agar bisa dihapus-tulis ulang saat pencarian dilakukan
         var markersLayer = L.layerGroup().addTo(map);
-
-        // Objek Global untuk menyimpan referensi marker berdasarkan Port ID agar fungsi fokus bisa mengaksesnya
         var activeMarkers = {};
 
-        /**
-         * FUNGSI DECODER DMS KE DESIMAL:
-         * Mengubah teks koordinat derajat di database (misal: "6 05 S" atau "106 53 E")
-         * menjadi format angka desimal murni (float) agar dikenali oleh Leaflet.js.
-         */
         function parseDMSToDecimal(dmsStr) {
             if (!dmsStr) return null;
             
@@ -312,18 +304,13 @@
             return parseFloat(str);
         }
 
-        /**
-         * Mengambil data koordinat pelabuhan dari API dan me-render marker interaktif ke peta
-         */
         function loadMapMarkers() {
             var search = document.getElementById('mapSearch').value;
             var countryId = document.getElementById('mapCountryFilter').value;
 
-            // Hapus semua marker lama sebelum memuat yang baru
             markersLayer.clearLayers();
-            activeMarkers = {}; // Reset database referensi marker aktif
+            activeMarkers = {}; 
 
-            // Jalankan REST API internal
             var url = `/api/ports?search=${encodeURIComponent(search)}&country_id=${encodeURIComponent(countryId)}`;
 
             fetch(url)
@@ -337,7 +324,6 @@
 
                         if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
                             
-                            // Markup Konten Balon Keterangan (Popup) yang modern
                             var popupContent = `
                                 <div style="font-family: system-ui, sans-serif; padding: 4px; min-width: 180px;">
                                     <div style="display: flex; align-items: center; gap: 6px; margin-bottom: 8px;">
@@ -357,12 +343,10 @@
                             markersLayer.addLayer(marker);
                             bounds.push([lat, lng]);
 
-                            // Simpan referensi marker menggunakan port ID
                             activeMarkers[port.id] = marker;
                         }
                     });
 
-                    // Logika Smart Zooming & Pergerakan Peta
                     if (bounds.length === 1) {
                         map.flyTo(bounds[0], 12, { animate: true, duration: 1.5 });
                     } else if (bounds.length > 1) {
@@ -374,26 +358,18 @@
                 .catch(err => console.error('Gagal memuat data API Pelabuhan:', err));
         }
 
-        /**
-         * FUNGSI FOKUS INTERAKTIF BARU:
-         * Mengarahkan peta secara mulus langsung ke koordinat pelabuhan dari baris tabel,
-         * lalu otomatis membuka popup informasi pelabuhan yang bersangkutan.
-         */
         function focusPortOnMap(portId, latStr, lngStr) {
             var lat = parseDMSToDecimal(latStr);
             var lng = parseDMSToDecimal(lngStr);
 
             if (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng)) {
-                // Terbangkan kamera peta ke koordinat target (zoom level 13)
                 map.flyTo([lat, lng], 13, {
                     animate: true,
                     duration: 1.5
                 });
 
-                // Scroll layar ke arah peta dengan mulus agar user langsung melihat pergerakannya
                 document.getElementById('portMap').scrollIntoView({ behavior: 'smooth', block: 'center' });
 
-                // Buka popup balon info marker setelah animasi pergeseran selesai (1.5 detik delay)
                 setTimeout(function() {
                     if (activeMarkers[portId]) {
                         activeMarkers[portId].openPopup();
@@ -404,7 +380,6 @@
             }
         }
 
-        // Jalankan mapping data pelabuhan begitu seluruh komponen halaman selesai dimuat
         document.addEventListener('DOMContentLoaded', function() {
             loadMapMarkers();
         });

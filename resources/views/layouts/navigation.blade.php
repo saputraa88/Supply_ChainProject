@@ -1,191 +1,126 @@
-<nav x-data="{ open: false }" class="bg-white border-b border-gray-100">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between h-16">
-
-            <div class="flex">
-                <!-- LOGO APLIKASI (Link dinamis sesuai Role) -->
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ Auth::user()->role === 'admin' ? route('admin.dashboard') : route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
-                </div>
-
-                <!-- MENU NAVIGASI (TAMPILAN DESKTOP) -->
-                <div class="hidden sm:flex sm:items-center sm:space-x-8 sm:ms-10">
-
-                    @if(Auth::user()->role === 'admin')
-                        <!-- 👑 HANYA TAMPIL UNTUK ADMIN -->
-                        <x-nav-link
-                            :href="route('admin.dashboard')"
-                            :active="request()->routeIs('admin.dashboard')">
-                            Panel Admin
-                        </x-nav-link>
-                    @else
-                        <!-- 👥 HANYA TAMPIL UNTUK USER BIASA -->
-                        <x-nav-link
-                            :href="route('dashboard')"
-                            :active="request()->routeIs('dashboard')">
-                            Dashboard
-                        </x-nav-link>
-
-                        <x-nav-link
-                            :href="route('countries.index')"
-                            :active="request()->routeIs('countries.*') && !request()->routeIs('countries.comparison')">
-                            Negara
-                        </x-nav-link>
-
-                        <x-nav-link
-                            :href="route('watchlist.index')"
-                            :active="request()->routeIs('watchlist.index')">
-                            Daftar Pantau
-                        </x-nav-link>
-
-                        <x-nav-link
-                            :href="route('ports.index')"
-                            :active="request()->routeIs('ports.*')">
-                            Pelabuhan
-                        </x-nav-link>
-
-                        <x-nav-link
-                            :href="route('countries.comparison')"
-                            :active="request()->routeIs('countries.comparison')">
-                            Bandingkan
-                        </x-nav-link>
-
-                        <x-nav-link
-                            :href="route('currency.index')"
-                            :active="request()->routeIs('currency.index')">
-                            Daftar Kurs
-                        </x-nav-link>
-
-                        <x-nav-link
-                            :href="route('historical.index')"
-                            :active="request()->routeIs('historical.index')">
-                            Visualisasi Data
-                        </x-nav-link>
-                    @endif
-
-                </div>
+<nav style="width: 265px; height: 100vh; background-color: #0b1120; color: #e2e8f0; display: flex; flex-direction: column; justify-content: space-between; border-right: 1px solid #1e293b; box-sizing: border-box; flex-shrink: 0; z-index: 99; font-family: 'Figtree', system-ui, -apple-system, sans-serif;">
+    
+    <!-- BAGIAN ATAS: Branding & List Navigasi Menu -->
+    <div style="display: flex; flex-direction: column;">
+        
+        <!-- Header Brand Aplikasi (Sudut Rounded & Soft) -->
+        <div style="padding: 28px 24px; display: flex; align-items: center; gap: 14px;">
+            <div style="width: 44px; height: 44px; background: linear-gradient(135deg, #3b82f6, #06b6d4); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 4px 20px rgba(59, 130, 246, 0.25);">
+                ⚓
             </div>
-
-            <div class="hidden sm:flex sm:items-center sm:ms-6">
-                <x-dropdown align="right" width="48">
-
-                    <x-slot name="trigger">
-                        <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm rounded-md text-gray-500 bg-white hover:text-gray-700">
-                            <div>{{ Auth::user()->name }}</div>
-                            <div class="ms-1">
-                                <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
-
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            Profile
-                        </x-dropdown-link>
-
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <x-dropdown-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
-                                Logout
-                            </x-dropdown-link>
-                        </form>
-                    </x-slot>
-
-                </x-dropdown>
+            <div style="display: flex; flex-direction: column; gap: 3px;">
+                <h1 style="color: #ffffff; font-size: 15px; font-weight: 800; margin: 0; line-height: 1.2; letter-spacing: 0.8px;">PORTAL MARITIM</h1>
+                <span style="color: #06b6d4; font-size: 10px; font-weight: 700; margin: 0; letter-spacing: 0.5px;">CONTROL DASHBOARD</span>
             </div>
-
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = !open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:bg-gray-100">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': !open}" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-                        <path :class="{'hidden': !open, 'inline-flex': open}" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-
         </div>
-    </div>
 
-    <!-- MENU NAVIGASI (TAMPILAN RESPONSIF / MOBILE HP) -->
-    <div :class="{'block': open, 'hidden': !open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
+        <!-- Wadah Link Navigasi Menurun (Sudut Diperlembut ke 14px) -->
+        <div style="padding: 10px 16px; display: flex; flex-direction: column; gap: 6px;">
 
             @if(Auth::user()->role === 'admin')
-                <!-- 👑 HANYA TAMPIL UNTUK ADMIN (MOBILE) -->
-                <x-responsive-nav-link
-                    :href="route('admin.dashboard')"
-                    :active="request()->routeIs('admin.dashboard')">
-                    Panel Admin
-                </x-responsive-nav-link>
+                <!-- MENU ADMIN -->
+                <a href="{{ route('admin.dashboard') }}" 
+                   style="display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-radius: 14px; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.25s; {{ request()->routeIs('admin.dashboard') ? 'background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #ffffff; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35); font-weight: 800;' : 'color: #cbd5e1;' }}"
+                   @if(!request()->routeIs('admin.dashboard')) onmouseover="this.style.backgroundColor='#1e293b'; this.style.color='#ffffff';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#cbd5e1';" @endif>
+                    <i class="bi bi-shield-lock-fill" style="font-size: 16px; color: #f43f5e;"></i>
+                    <span>Panel Admin</span>
+                </a>
             @else
-                <!-- 👥 HANYA TAMPIL UNTUK USER BIASA (MOBILE) -->
-                <x-responsive-nav-link
-                    :href="route('dashboard')"
-                    :active="request()->routeIs('dashboard')">
-                    Dashboard
-                </x-responsive-nav-link>
+                <!-- MENU USER BIASA -->
+                
+                <!-- 1. Dashboard -->
+                <a href="{{ route('dashboard') }}" 
+                   style="display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-radius: 14px; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.25s; {{ request()->routeIs('dashboard') ? 'background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #ffffff; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35); font-weight: 800;' : 'color: #cbd5e1;' }}"
+                   @if(!request()->routeIs('dashboard')) onmouseover="this.style.backgroundColor='#1e293b'; this.style.color='#ffffff';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#cbd5e1';" @endif>
+                    <i class="bi bi-grid-1x2-fill" style="font-size: 16px; color: {{ request()->routeIs('dashboard') ? '#ffffff' : '#06b6d4' }};"></i>
+                    <span>Dashboard</span>
+                </a>
 
-                <x-responsive-nav-link
-                    :href="route('countries.index')"
-                    :active="request()->routeIs('countries.*') && !request()->routeIs('countries.comparison')">
-                    Negara
-                </x-responsive-nav-link>
+                <!-- 2. Negara -->
+                <a href="{{ route('countries.index') }}" 
+                   style="display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-radius: 14px; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.25s; {{ (request()->routeIs('countries.*') && !request()->routeIs('countries.comparison')) ? 'background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #ffffff; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35); font-weight: 800;' : 'color: #cbd5e1;' }}"
+                   @if(!(request()->routeIs('countries.*') && !request()->routeIs('countries.comparison'))) onmouseover="this.style.backgroundColor='#1e293b'; this.style.color='#ffffff';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#cbd5e1';" @endif>
+                    <i class="bi bi-flag-fill" style="font-size: 16px; color: {{ (request()->routeIs('countries.*') && !request()->routeIs('countries.comparison')) ? '#ffffff' : '#10b981' }};"></i>
+                    <span>Negara</span>
+                </a>
 
-                <x-responsive-nav-link
-                    :href="route('watchlist.index')"
-                    :active="request()->routeIs('watchlist.index')">
-                    Daftar Pantau
-                </x-responsive-nav-link>
+                <!-- 3. Daftar Pantau -->
+                <a href="{{ route('watchlist.index') }}" 
+                   style="display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-radius: 14px; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.25s; {{ request()->routeIs('watchlist.index') ? 'background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #ffffff; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35); font-weight: 800;' : 'color: #cbd5e1;' }}"
+                   @if(!request()->routeIs('watchlist.index')) onmouseover="this.style.backgroundColor='#1e293b'; this.style.color='#ffffff';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#cbd5e1';" @endif>
+                    <i class="bi bi-eye-fill" style="font-size: 16px; color: {{ request()->routeIs('watchlist.index') ? '#ffffff' : '#f59e0b' }};"></i>
+                    <span>Daftar Pantau</span>
+                </a>
 
-                <x-responsive-nav-link
-                    :href="route('ports.index')"
-                    :active="request()->routeIs('ports.*')">
-                    Pelabuhan
-                </x-responsive-nav-link>
+                <!-- 4. Pelabuhan -->
+                <a href="{{ route('ports.index') }}" 
+                   style="display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-radius: 14px; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.25s; {{ request()->routeIs('ports.*') ? 'background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #ffffff; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35); font-weight: 800;' : 'color: #cbd5e1;' }}"
+                   @if(!request()->routeIs('ports.*')) onmouseover="this.style.backgroundColor='#1e293b'; this.style.color='#ffffff';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#cbd5e1';" @endif>
+                    <i class="bi bi-compass-fill" style="font-size: 16px; color: {{ request()->routeIs('ports.*') ? '#ffffff' : '#3b82f6' }};"></i>
+                    <span>Pelabuhan</span>
+                </a>
 
-                <x-responsive-nav-link
-                    :href="route('countries.comparison')"
-                    :active="request()->routeIs('countries.comparison')">
-                    Bandingkan
-                </x-responsive-nav-link>
+                <!-- 5. Bandingkan -->
+                <a href="{{ route('countries.comparison') }}" 
+                   style="display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-radius: 14px; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.25s; {{ request()->routeIs('countries.comparison') ? 'background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #ffffff; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35); font-weight: 800;' : 'color: #cbd5e1;' }}"
+                   @if(!request()->routeIs('countries.comparison')) onmouseover="this.style.backgroundColor='#1e293b'; this.style.color='#ffffff';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#cbd5e1';" @endif>
+                    <i class="bi bi-arrow-left-right" style="font-size: 16px; color: {{ request()->routeIs('countries.comparison') ? '#ffffff' : '#d946ef' }};"></i>
+                    <span>Bandingkan</span>
+                </a>
 
-                <x-responsive-nav-link
-                    :href="route('currency.index')"
-                    :active="request()->routeIs('currency.index')">
-                    Daftar Kurs
-                </x-responsive-nav-link>
+                <!-- 6. Daftar Kurs -->
+                <a href="{{ route('currency.index') }}" 
+                   style="display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-radius: 14px; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.25s; {{ request()->routeIs('currency.index') ? 'background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #ffffff; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35); font-weight: 800;' : 'color: #cbd5e1;' }}"
+                   @if(!request()->routeIs('currency.index')) onmouseover="this.style.backgroundColor='#1e293b'; this.style.color='#ffffff';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#cbd5e1';" @endif>
+                    <i class="bi bi-cash-coin" style="font-size: 16px; color: {{ request()->routeIs('currency.index') ? '#ffffff' : '#f97316' }};"></i>
+                    <span>Daftar Kurs</span>
+                </a>
 
-                <x-responsive-nav-link
-                    :href="route('historical.index')"
-                    :active="request()->routeIs('historical.index')">
-                    Visualisasi Data
-                </x-responsive-nav-link>
+                <!-- 7. Visualisasi Data -->
+                <a href="{{ route('historical.index') }}" 
+                   style="display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-radius: 14px; font-size: 14px; font-weight: 700; text-decoration: none; transition: all 0.25s; {{ request()->routeIs('historical.index') ? 'background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #ffffff; box-shadow: 0 8px 20px rgba(37, 99, 235, 0.35); font-weight: 800;' : 'color: #cbd5e1;' }}"
+                   @if(!request()->routeIs('historical.index')) onmouseover="this.style.backgroundColor='#1e293b'; this.style.color='#ffffff';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#cbd5e1';" @endif>
+                    <i class="bi bi-bar-chart-line-fill" style="font-size: 16px; color: {{ request()->routeIs('historical.index') ? '#ffffff' : '#f43f5e' }};"></i>
+                    <span>Visualisasi Data</span>
+                </a>
             @endif
 
         </div>
+    </div>
 
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+    <!-- BAGIAN BAWAH: Profil Pengguna & Sistem Keluar (Clean & Smooth) -->
+    <div style="padding: 20px 16px; background-color: #070a13; display: flex; flex-direction: column; gap: 12px;">
+        
+        <!-- Informasi User Terhubung -->
+        <div style="display: flex; align-items: center; gap: 12px; padding: 0 8px;">
+            <div style="width: 40px; height: 40px; border-radius: 12px; background-color: #2563eb; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.15);">
+                {{ substr(Auth::user()->name ?? 'U', 0, 1) }}
             </div>
-
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    Profile
-                </x-responsive-nav-link>
-
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <x-responsive-nav-link :href="route('logout')" onclick="event.preventDefault(); this.closest('form').submit();">
-                        Logout
-                    </x-responsive-nav-link>
-                </form>
+            <div style="display: flex; flex-direction: column; min-width: 0; flex: 1; overflow: hidden;">
+                <p style="color: #ffffff; font-size: 14px; font-weight: 800; margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ Auth::user()->name }}</p>
+                <span style="color: #64748b; font-size: 11px; font-weight: 600; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ Auth::user()->email }}</span>
             </div>
         </div>
+
+        <!-- Link Pengaturan Profil & Keluar -->
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+            <a href="{{ route('profile.edit') }}" 
+               style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: #cbd5e1; text-decoration: none; font-size: 13px; font-weight: 700; border-radius: 12px; transition: all 0.2s;"
+               onmouseover="this.style.backgroundColor='#1e293b'; this.style.color='#ffffff';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#cbd5e1';">
+                <i class="bi bi-person-circle" style="color: #3b82f6; font-size: 15px;"></i>
+                <span>Pengaturan Profil</span>
+            </a>
+
+            <form method="POST" action="{{ route('logout') }}" style="margin: 0; padding: 0;">
+                @csrf
+                <button type="submit" 
+                        style="display: flex; align-items: center; gap: 10px; padding: 10px 14px; color: #cbd5e1; text-decoration: none; font-size: 13px; font-weight: 700; border-radius: 12px; transition: all 0.2s; width: 100%; border: none; background: transparent; text-align: left; cursor: pointer; font-family: inherit;"
+                        onmouseover="this.style.backgroundColor='rgba(239,68,68,0.08)'; this.style.color='#ef4444';" onmouseout="this.style.backgroundColor='transparent'; this.style.color='#cbd5e1';">
+                    <i class="bi bi-box-arrow-right" style="color: #ef4444; font-size: 15px;"></i>
+                    <span>Keluar Aplikasi</span>
+                </button>
+            </form>
+        </div>
     </div>
+
 </nav>
